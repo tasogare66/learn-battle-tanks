@@ -1,34 +1,62 @@
 const GameObject = require('./GameObject.js');
+const OverlapTester = require('./OverlapTester.js');
 
 const SharedSettings = require('../public/js/SharedSettings.js');
 const GameSettings = require('./GameSettings.js');
 
 module.exports = class Tank extends GameObject
 {
-  constructor()
+  constructor(rectField, setWall)
   {
-    super(SharedSettings.TAKN_WIDTH, SharedSettings.TAKN_HEIGHT, 0.0, 0.0, Math.random() * 2 * Math.PI);
+    super(SharedSettings.TANK_WIDTH, SharedSettings.TANK_HEIGHT, 0.0, 0.0, Math.random() * 2 * Math.PI);
 
     this.objMovement = {}; //動作
     this.fSpeed = GameSettings.TANK_SPEED;
     this.fRotationSpeed = GameSettings.TANK_ROTATION_SPEED;
 
-    this.fX = Math.random() * (SharedSettings.FIELD_WIDTH-SharedSettings.TANK_WIDTH);
-    this.fY = Math.random() * (SharedSettings.FIELD_HEIGHT-SharedSettings.TANK_HEIGHT);
+    //障害物にぶつからない初期位置の算出
+    do {
+      this.setPos(rectField.fLeft + Math.random() * (rectField.fRight - rectField.fLeft),
+        rectField.fBottom + Math.random() * (rectField.fTop - rectField.fBottom));
+    } while (this.overlapWalls(setWall));
   }
 
-  update(fDeltaTime)
+  update(fDeltaTime, rectField, setWall)
   {
+    const fX_old = this.fX;
+    const fY_old = this.fY;
+    let bDrived = false; //前後方向に動きがあったか
     const fDistance = this.fSpeed * fDeltaTime;
     if (this.objMovement['forward'])
     {
       this.fX += fDistance * Math.cos(this.fAngle);
       this.fY += fDistance * Math.sin(this.fAngle);
+      this.setPos(this.fX,this.fY);
+      bDrived = true;
     }
     if (this.objMovement['back'])
     {
       this.fX -= fDistance * Math.cos(this.fAngle);
       this.fY -= fDistance * Math.sin(this.fAngle);
+      this.setPos(this.fX,this.fY);
+      bDrived = true;
+    }
+    if (bDrived) //更新ある場合衝突チェック
+    {
+      let bCollision = false;
+      if (!OverlapTester.pointInRect(rectField, { fX: this.fX, fY: this.fY}))
+      {
+        bCollision = true;
+      }
+      else if(this.overlapWalls(setWall))
+      {
+        bCollision = true;
+      }
+
+      if (bCollision) {
+        this.setPos(fX_old,fY_old); //戻す
+        bDrived = false;
+      }
     }
 
     if (this.objMovement['left'])
@@ -39,5 +67,7 @@ module.exports = class Tank extends GameObject
     {
       this.fAngle += this.fRotationSpeed * fDeltaTime;
     }
+
+    return bDrived; //前後の動きがあったか返す
   }
 }

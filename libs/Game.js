@@ -59,7 +59,8 @@ module.exports = class Game
         //最新状況をクライアントに送信
         io.emit('update',
           Array.from(world.setTank), //Tankのリスト、Setオブジェクトは送信不可(SetにJSON変換が未定義だから?)
-         iNanosecDiff);
+          Array.from(world.setWall),
+          iNanosecDiff);
       },
       1000 / GameSettings.FRAMERATE //[ms]
     );

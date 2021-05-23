@@ -9,6 +9,7 @@ class Screen
     this.assets = new Assets();
     this.iProcessingTimeNanoSec = 0;
     this.aTank = null;
+    this.aWall = null;
 
     this.canvas.width = SharedSettings.FIELD_WIDTH;
     this.canvas.height = SharedSettings.FIELD_HEIGHT;
@@ -31,8 +32,9 @@ class Screen
       }
     );
     this.socket.on(
-      'update', (aTank, iProcessingTimeNanoSec)=>{
+      'update', (aTank, aWall, iProcessingTimeNanoSec)=>{
         this.aTank = aTank;
+        this.aWall = aWall;
         this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
       }
     );
@@ -62,6 +64,16 @@ class Screen
         (tank)=>
         {
           this.renderTank(tank, iIndexFrame);
+        }
+      );
+    }
+
+    //壁の描画
+    if (null != this.aWall)
+    {
+      this.aWall.forEach(
+        (wall) => {
+          this.renderWall(wall);
         }
       );
     }
@@ -122,5 +134,16 @@ class Screen
     this.context.restore();
 
     this.context.restore();
+  }
+
+  renderWall(wall)
+  {
+    this.context.drawImage(this.assets.imageItems,
+      this.assets.rectWallInItemsImage.sx, this.assets.rectWallInItemsImage.sy,	// 描画元画像の右上座標
+      this.assets.rectWallInItemsImage.sw, this.assets.rectWallInItemsImage.sh,	// 描画元画像の大きさ
+      wall.fX - SharedSettings.WALL_WIDTH * 0.5,// 画像先領域の右上座標（領域中心が、原点になるように指定する）
+      wall.fY - SharedSettings.WALL_HEIGHT * 0.5,// 画像先領域の右上座標（領域中心が、原点になるように指定する）
+      SharedSettings.WALL_WIDTH,	// 描画先領域の大きさ
+      SharedSettings.WALL_HEIGHT);	// 描画先領域の大きさ
   }
 }
