@@ -36,5 +36,10 @@ $(document).on(
       // サーバーに, イベント名'change-my-ovement' objMovementオブジェクトを送信
       socket.emit('change-my-movement', objMovement);
     }
+
+    if (' '===event.key && 'keydown' == event.type)
+    {
+      socket.emit('shoot');
+    }
   }
 );

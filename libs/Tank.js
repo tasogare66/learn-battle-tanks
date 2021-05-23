@@ -1,5 +1,6 @@
 const GameObject = require('./GameObject.js');
 const OverlapTester = require('./OverlapTester.js');
+const Bullet = require('./Bullet.js');
 
 const SharedSettings = require('../public/js/SharedSettings.js');
 const GameSettings = require('./GameSettings.js');
@@ -13,6 +14,7 @@ module.exports = class Tank extends GameObject
     this.objMovement = {}; //動作
     this.fSpeed = GameSettings.TANK_SPEED;
     this.fRotationSpeed = GameSettings.TANK_ROTATION_SPEED;
+    this.iTimeLastShot = 0; //最終ショット時刻
 
     //障害物にぶつからない初期位置の算出
     do {
@@ -69,5 +71,21 @@ module.exports = class Tank extends GameObject
     }
 
     return bDrived; //前後の動きがあったか返す
+  }
+
+  canShoot()
+  {
+    return !(GameSettings.TANK_WAIT_FOR_NEW_BULLET > Date.now()-this.iTimeLastShot);
+  }
+  shoot()
+  {
+    if (!this.canShoot()){
+      return null;
+    }
+    //最終ショット時刻
+    this.iTimeLastShot = Date.now();
+    const fX = this.fX + this.fWidth * 0.5 * Math.cos(this.fAngle);
+    const fY = this.fY + this.fWidth * 0.5 * Math.sin(this.fAngle);
+    return new Bullet(fX, fY, this.fAngle, this);
   }
 }

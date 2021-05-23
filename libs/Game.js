@@ -31,6 +31,13 @@ module.exports = class Game
           }
         );
 
+        socket.on('shoot',
+          () => {
+            if (!tank) return;
+            world.createBullet(tank); //ショット
+          }
+        );
+
         socket.on('disconnect',
           ()=>{
             console.log('disconnect : socket.id=%s',socket.id);
@@ -60,6 +67,7 @@ module.exports = class Game
         io.emit('update',
           Array.from(world.setTank), //Tankのリスト、Setオブジェクトは送信不可(SetにJSON変換が未定義だから?)
           Array.from(world.setWall),
+          Array.from(world.setBullet),
           iNanosecDiff);
       },
       1000 / GameSettings.FRAMERATE //[ms]

@@ -7,6 +7,9 @@ class SharedSettings{
   //壁サイズ
   static get WALL_WIDTH() { return 250.0; }
   static get WALL_HEIGHT() { return 50.0; }
+  //弾丸
+  static get BULLET_WIDTH() { return 15.0; }
+  static get BULLET_HEIGHT() { return 15.0; }
 }
 
 if (typeof module != 'undefined' && typeof module.exports !== 'undefined')
