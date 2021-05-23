@@ -18,13 +18,13 @@ module.exports = class Game
         socket.on('enter-the-game',
           ()=>{
             console.log('enter-the-game : socket.id=%s',socket.id);
-            tank = world.createTank();
+            tank = world.createTank(socket.id);
           }
         );
 
         socket.on('change-my-movement',
           (objMovement)=>{
-            if(!tank){
+            if(!tank || 0===tank.iLife){
               return;
             }
             tank.objMovement = objMovement; //動作
@@ -33,7 +33,7 @@ module.exports = class Game
 
         socket.on('shoot',
           () => {
-            if (!tank) return;
+            if (!tank || 0===tank.iLife) return;
             world.createBullet(tank); //ショット
           }
         );

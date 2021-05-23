@@ -4,6 +4,7 @@ const Wall = require('./Wall.js');
 // 設定
 const SharedSettings = require( '../public/js/SharedSettings.js' );
 const GameSettings = require( './GameSettings.js' );
+const OverlapTester = require('./OverlapTester.js');
 
 //ワールドクラス
 module.exports = class World{
@@ -68,7 +69,26 @@ module.exports = class World{
 
   checkCollisions()
   {
-
+    this.setBullet.forEach(
+      (bullet)=>{
+        this.setTank.forEach(
+          (tank)=>{
+            if (tank != bullet.tank)
+            {
+              if (OverlapTester.overlapRects(tank.rectBound, bullet.rectBound))
+              {
+                if (0 === tank.damage()) {
+                  console.log('dead : socket.id = %s', tank.strSocketID);
+                  this.destroyTank(tank);
+                }
+                this.destroyBullet(bullet);
+                bullet.tank.iScore++; //当てたtankの得点を加算
+              }
+            }
+          }
+        );
+      }
+    );
   }
 
   doNewActions(fDeltaTime)
@@ -76,7 +96,7 @@ module.exports = class World{
 
   }
 
-  createTank()
+  createTank(strSocketID)
   {
     //tankの可動域
     const rectTankField = {
@@ -86,7 +106,7 @@ module.exports = class World{
       fTop: SharedSettings.FIELD_HEIGHT - SharedSettings.TANK_HEIGHT*0.5
     };
 
-    const tank = new Tank(rectTankField, this.setWall);
+    const tank = new Tank(strSocketID, rectTankField, this.setWall);
     this.setTank.add(tank);
     return tank;
   }

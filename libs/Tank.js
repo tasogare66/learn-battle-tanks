@@ -7,20 +7,37 @@ const GameSettings = require('./GameSettings.js');
 
 module.exports = class Tank extends GameObject
 {
-  constructor(rectField, setWall)
+  constructor(strSocketID, rectField, setWall)
   {
     super(SharedSettings.TANK_WIDTH, SharedSettings.TANK_HEIGHT, 0.0, 0.0, Math.random() * 2 * Math.PI);
 
+    this.strSocketID = strSocketID;
     this.objMovement = {}; //動作
     this.fSpeed = GameSettings.TANK_SPEED;
     this.fRotationSpeed = GameSettings.TANK_ROTATION_SPEED;
     this.iTimeLastShot = 0; //最終ショット時刻
+    this.iLife = GameSettings.TANK_LIFE_MAX;
+    this.iLifeMax = GameSettings.TANK_LIFE_MAX;
+    this.iScore = 0;
 
     //障害物にぶつからない初期位置の算出
     do {
       this.setPos(rectField.fLeft + Math.random() * (rectField.fRight - rectField.fLeft),
         rectField.fBottom + Math.random() * (rectField.fTop - rectField.fBottom));
     } while (this.overlapWalls(setWall));
+  }
+
+  toJSON()
+  {
+    return Object.assign(
+      super.toJSON(),
+      {
+        strSocketID: this.strSocketID,
+        iLife: this.iLife,
+        iLifeMax: this.iLifeMax,
+        iScore: this.iScore,
+      }
+    );
   }
 
   update(fDeltaTime, rectField, setWall)
@@ -87,5 +104,11 @@ module.exports = class Tank extends GameObject
     const fX = this.fX + this.fWidth * 0.5 * Math.cos(this.fAngle);
     const fY = this.fY + this.fWidth * 0.5 * Math.sin(this.fAngle);
     return new Bullet(fX, fY, this.fAngle, this);
+  }
+
+  damage()
+  {
+    this.iLife--;
+    return this.iLife;
   }
 }
