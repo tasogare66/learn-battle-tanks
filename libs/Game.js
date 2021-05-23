@@ -16,9 +16,9 @@ module.exports = class Game
         let tank = null;
 
         socket.on('enter-the-game',
-          ()=>{
+          (objConfig)=>{
             console.log('enter-the-game : socket.id=%s',socket.id);
-            tank = world.createTank(socket.id);
+            tank = world.createTank(socket.id, objConfig.strNickName);
           }
         );
 

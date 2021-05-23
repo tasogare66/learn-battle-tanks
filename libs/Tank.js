@@ -7,11 +7,12 @@ const GameSettings = require('./GameSettings.js');
 
 module.exports = class Tank extends GameObject
 {
-  constructor(strSocketID, rectField, setWall)
+  constructor(strSocketID, strNickName, rectField, setWall)
   {
     super(SharedSettings.TANK_WIDTH, SharedSettings.TANK_HEIGHT, 0.0, 0.0, Math.random() * 2 * Math.PI);
 
     this.strSocketID = strSocketID;
+    this.strNickName = strNickName;
     this.objMovement = {}; //動作
     this.fSpeed = GameSettings.TANK_SPEED;
     this.fRotationSpeed = GameSettings.TANK_ROTATION_SPEED;
@@ -33,6 +34,7 @@ module.exports = class Tank extends GameObject
       super.toJSON(),
       {
         strSocketID: this.strSocketID,
+        strNickName: this.strNickName,
         iLife: this.iLife,
         iLifeMax: this.iLifeMax,
         iScore: this.iScore,

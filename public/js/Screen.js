@@ -29,7 +29,7 @@ class Screen
       'connect', ()=>
       {
         console.log('connect : socket.id = %s', socket.id);
-        this.socket.emit('enter-the-game');
+        //this.socket.emit('enter-the-game');
       }
     );
     this.socket.on(
@@ -38,6 +38,12 @@ class Screen
         this.aWall = aWall;
         this.aBullet = aBullet;
         this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
+      }
+    );
+    //deadしたらスタート画面
+    this.socket.on(
+      'dead',()=>{
+        $('#start-screen').show();
       }
     );
   }
@@ -187,6 +193,14 @@ class Screen
         fLifeCellWidth * (tank.iLifeMax - tank.iLife),
         10);
     }
+
+    //name
+    this.context.save();
+    this.context.textAlign = 'center';
+    this.context.font = RenderingSettings.NICKNAME_FONT;
+    this.context.fillStyle = RenderingSettings.NICKNAME_COLOR;
+    this.context.fillText(tank.strNickName, 0, -50);
+    this.context.restore();
 
     this.context.restore();
   }

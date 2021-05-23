@@ -43,3 +43,12 @@ $(document).on(
     }
   }
 );
+
+//start button
+$('#start-button').on(
+  'click',()=>{
+    const objConfig = { strNickName: $('#nickname').val() };
+    socket.emit('enter-the-game', objConfig);
+    $('#start-screen').hide();
+  }
+);

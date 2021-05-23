@@ -96,7 +96,7 @@ module.exports = class World{
 
   }
 
-  createTank(strSocketID)
+  createTank(strSocketID, strNickName)
   {
     //tankの可動域
     const rectTankField = {
@@ -106,13 +106,14 @@ module.exports = class World{
       fTop: SharedSettings.FIELD_HEIGHT - SharedSettings.TANK_HEIGHT*0.5
     };
 
-    const tank = new Tank(strSocketID, rectTankField, this.setWall);
+    const tank = new Tank(strSocketID, strNickName, rectTankField, this.setWall);
     this.setTank.add(tank);
     return tank;
   }
   destroyTank(tank)
   {
     this.setTank.delete(tank);
+    this.io.to(tank.strSocketID).emit('dead'); //dead event
   }
 
   createBullet(tank)
