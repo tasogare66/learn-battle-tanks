@@ -8,6 +8,7 @@ class Screen
 
     this.assets = new Assets();
     this.iProcessingTimeNanoSec = 0;
+    this.aTank = null;
 
     this.canvas.width = SharedSettings.FIELD_WIDTH;
     this.canvas.height = SharedSettings.FIELD_HEIGHT;
@@ -30,7 +31,8 @@ class Screen
       }
     );
     this.socket.on(
-      'update', (iProcessingTimeNanoSec)=>{
+      'update', (aTank, iProcessingTimeNanoSec)=>{
+        this.aTank = aTank;
         this.iProcessingTimeNanoSec = iProcessingTimeNanoSec;
       }
     );
@@ -51,6 +53,20 @@ class Screen
     this.context.clearRect(0,0,canvas.width,canvas.height);
     this.renderField();
 
+    //タンクの描画
+    if (null != this.aTank)
+    {
+      const fTimeCurrentSec = iTimeCurrent * 0.001;
+      const iIndexFrame = parseInt(fTimeCurrentSec / 0.2) % 2; //フレーム番号
+      this.aTank.forEach(
+        (tank)=>
+        {
+          this.renderTank(tank, iIndexFrame);
+        }
+      );
+    }
+
+    //枠の描画
     this.context.save();
     this.context.strokeStyle = RenderingSettings.FIELD_LINECOLOR;
     this.context.lineWidth = RenderingSettings.FIELD_WIDTH;
@@ -85,6 +101,26 @@ class Screen
           RenderingSettings.FIELDTILE_HEIGHT );	// 描画先領域の大きさ
       }
     }
+    this.context.restore();
+  }
+
+  renderTank(tank, iIndexFrame)
+  {
+    this.context.save();
+
+    this.context.translate(tank.fX, tank.fY);
+
+    this.context.save();
+    this.context.rotate(tank.fAngle);
+    this.context.drawImage( this.assets.imageItems,
+      this.assets.arectTankInItemsImage[iIndexFrame].sx, this.assets.arectTankInItemsImage[iIndexFrame].sy,	// 描画元画像の右上座標
+      this.assets.arectTankInItemsImage[iIndexFrame].sw, this.assets.arectTankInItemsImage[iIndexFrame].sh,	// 描画元画像の大きさ
+      -SharedSettings.TANK_WIDTH * 0.5,	// 画像先領域の右上座標（領域中心が、原点になるように指定する）
+      -SharedSettings.TANK_HEIGHT * 0.5,	// 画像先領域の右上座標（領域中心が、原点になるように指定する）
+      SharedSettings.TANK_WIDTH,	// 描画先領域の大きさ
+      SharedSettings.TANK_HEIGHT);	// 描画先領域の大きさ
+    this.context.restore();
+
     this.context.restore();
   }
 }

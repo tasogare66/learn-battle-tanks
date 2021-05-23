@@ -1,8 +1,11 @@
+const Tank = require('./Tank.js');
+
 //ワールドクラス
 module.exports = class World{
   constructor(io)
   {
     this.io = io;
+    this.setTank = new Set();
   }
 
   update(fDeltaTime)
@@ -14,7 +17,11 @@ module.exports = class World{
 
   updateObjects(fDeltaTime)
   {
-
+    this.setTank.forEach(
+      (tank)=> {
+        tank.update(fDeltaTime);
+      }
+    );
   }
 
   checkCollisions()
@@ -25,5 +32,16 @@ module.exports = class World{
   doNewActions(fDeltaTime)
   {
 
+  }
+
+  createTank()
+  {
+    const tank = new Tank();
+    this.setTank.add(tank);
+    return tank;
+  }
+  destroyTank(tank)
+  {
+    this.setTank.delete(tank);
   }
 }

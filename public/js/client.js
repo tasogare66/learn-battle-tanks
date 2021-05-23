@@ -13,3 +13,28 @@ $(window).on(
     socket.disconnect();
   }
 );
+
+// キー入力の処理
+let objMovement = {}; //動作
+$(document).on(
+  'keydown keyup',
+  (event) => {
+    const KeyToCommand = {
+      'ArrowUp': 'forward',
+      'ArrowDown': 'back',
+      'ArrowLeft': 'left',
+      'ArrowRight': 'right',
+    };
+    const command = KeyToCommand[event.key];
+    if (command)
+    {
+      if (event.type == 'keydown'){
+        objMovement[command] = true;
+      } else {
+        objMovement[command] = false;
+      }
+      // サーバーに, イベント名'change-my-ovement' objMovementオブジェクトを送信
+      socket.emit('change-my-movement', objMovement);
+    }
+  }
+);

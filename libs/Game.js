@@ -13,10 +13,34 @@ module.exports = class Game
       'connection',
       (socket)=>{
         console.log('connection : socket.id=%s', socket.id);
+        let tank = null;
+
+        socket.on('enter-the-game',
+          ()=>{
+            console.log('enter-the-game : socket.id=%s',socket.id);
+            tank = world.createTank();
+          }
+        );
+
+        socket.on('change-my-movement',
+          (objMovement)=>{
+            if(!tank){
+              return;
+            }
+            tank.objMovement = objMovement; //動作
+          }
+        );
+
         socket.on('disconnect',
-        ()=>{
-          console.log('disconnect : socket.id=%s',socket.id);
-        });
+          ()=>{
+            console.log('disconnect : socket.id=%s',socket.id);
+            if (!tank) {
+              return;
+            }
+            world.destroyTank(tank);
+            tank = null; //自タンク解放
+          }
+        );
       }
     );
     //周期処理
@@ -33,7 +57,9 @@ module.exports = class Game
         const iNanosecDiff = hrtimeDiff[0] * 1e9 + hrtimeDiff[1];
 
         //最新状況をクライアントに送信
-        io.emit('update', iNanosecDiff);
+        io.emit('update',
+          Array.from(world.setTank), //Tankのリスト、Setオブジェクトは送信不可(SetにJSON変換が未定義だから?)
+         iNanosecDiff);
       },
       1000 / GameSettings.FRAMERATE //[ms]
     );
