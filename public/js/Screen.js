@@ -1,3 +1,5 @@
+//const SharedSettings = require("./SharedSettings");
+
 class Screen
 {
   constructor(socket, canvas)
@@ -21,6 +23,9 @@ class Screen
     this.context.webkitImageSmoothingEnabled = false;
     this.context.msImageSmoothingEnabled = false;
     this.context.imageSmoothingEnabled = false;
+
+    this.fCenterX = SharedSettings.FIELD_WIDTH*0.5;
+    this.fCenterY = SharedSettings.FIELD_HEIGHT*0.5;
   }
 
   initSocket()
@@ -73,7 +78,18 @@ class Screen
       );
     }
 
+    //描画中心座標
+    if (null != tankSelf){
+      this.fCenterX = tankSelf.fX;
+      this.fCenterY = tankSelf.fY;
+    }
+
     this.context.clearRect(0,0,canvas.width,canvas.height);
+
+    //全体を平行移動
+    this.context.save();
+    this.context.translate(this.canvas.width*0.5-this.fCenterX, this.canvas.height*0.5-this.fCenterY);
+
     this.renderField();
 
     //タンクの描画
@@ -108,6 +124,9 @@ class Screen
         }
       );
     }
+
+    //全体を平行移動の終了
+    this.context.restore();
 
     //枠の描画
     this.context.save();
