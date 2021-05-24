@@ -1,10 +1,12 @@
 const Tank = require('./Tank.js');
 const Wall = require('./Wall.js');
+const BotTank = require('./BotTank.js');
 
 // 設定
 const SharedSettings = require( '../public/js/SharedSettings.js' );
 const GameSettings = require( './GameSettings.js' );
 const OverlapTester = require('./OverlapTester.js');
+const Game = require('./game.js');
 
 //ワールドクラス
 module.exports = class World{
@@ -24,6 +26,12 @@ module.exports = class World{
         fY_bottom + SharedSettings.WALL_HEIGHT * 0.5);
       // 壁リストへの登録
       this.setWall.add(wall);
+    }
+
+    //botの生成
+    for (let i=0; i<GameSettings.BOTTANK_COUNT; i++)
+    {
+      this.createBotTank('BOT'+(i+1));
     }
   }
 
@@ -93,7 +101,17 @@ module.exports = class World{
 
   doNewActions(fDeltaTime)
   {
-
+    //botは新な弾を打つかも
+    this.setTank.forEach(
+      (tank)=>{
+        if (tank.isBot) {
+          if (GameSettings.BOTTANK_SHOOT_PROBABLITY_PER_SEC*fDeltaTime>Math.random())
+          {
+            this.createBullet(tank);
+          }
+        }
+      }
+    );
   }
 
   createTank(strSocketID, strNickName)
@@ -110,10 +128,33 @@ module.exports = class World{
     this.setTank.add(tank);
     return tank;
   }
+  createBotTank(strNickName)
+  {
+    //tankの可動域
+    const rectTankField = {
+      fLeft: 0+SharedSettings.TANK_WIDTH*0.5,
+      fBottom: 0+SharedSettings.TANK_HEIGHT*0.5,
+      fRight: SharedSettings.FIELD_WIDTH - SharedSettings.TANK_WIDTH*0.5,
+      fTop: SharedSettings.FIELD_HEIGHT - SharedSettings.TANK_HEIGHT*0.5
+    };
+
+    const tank = new BotTank(strNickName, rectTankField, this.setWall);
+    this.setTank.add(tank);
+  }
   destroyTank(tank)
   {
     this.setTank.delete(tank);
-    this.io.to(tank.strSocketID).emit('dead'); //dead event
+
+    if (tank.isBot)
+    {
+      //timerを設置し、新たなbotを生成する
+      setTimeout(
+        ()=>{
+          this.createBotTank(tank.strNickName);
+        }, GameSettings.BOTTANK_WAIT_FOR_NEW_BOT);
+    }else{
+      this.io.to(tank.strSocketID).emit('dead'); //dead event
+    }
   }
 
   createBullet(tank)
