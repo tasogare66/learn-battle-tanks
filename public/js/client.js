@@ -52,3 +52,53 @@ $('#start-button').on(
     $('#start-screen').hide();
   }
 );
+
+//タッチ情報
+const touches = {};
+
+//タッチ開始
+$('#canvas-2d').on(
+  'touchstart',(event)=>{
+    event.preventDefault();
+    socket.emit('shoot');
+    objMovement['forward'] = true;
+    Array.from(event.originalEvent.changedTouches).forEach(
+      (touch) => {
+        touches[touch.identifier] = { pageX: touch.pageX, pageY: touch.pageY };
+      }
+    );
+  }
+);
+
+//タッチしながら移動
+$('#canvas-2d').on(
+  'touchmove',(event)=>{
+    event.preventDefault(); //ブラウザ規定の動作の抑止
+    objMovement['right']=false;
+    objMovement['left']=false;
+    Array.from(event.originalEvent.changedTouches).forEach(
+      (touch)=>{
+        const startTouch = touches[touch.identifier];
+        objMovement['right'] |= (30 < (touch.pageX - startTouch.pageX));
+        objMovement['left'] |= (-30 > (touch.pageX - startTouch.pageX));
+      }
+    );
+    socket.emit('change-my-movement',objMovement);
+  }
+);
+
+//タッチ終了
+$('#canvas-2d').on(
+  'touchend',(event)=>{
+    event.preventDefault();
+    Array.from(event.originalEvent.changedTouches).forEach(
+      (touch)=>{
+        delete touches[touch.identifier];
+      }
+    );
+    if (0===Object.keys(touches).length){
+      objMovement={};
+      socket.emit('change-my-movement', objMovement);
+    }
+  }
+);
