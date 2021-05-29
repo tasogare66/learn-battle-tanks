@@ -14,8 +14,11 @@ class Screen
     this.aWall = null;
     this.aBullet = null;
 
-    this.canvas.width = SharedSettings.FIELD_WIDTH;
-    this.canvas.height = SharedSettings.FIELD_HEIGHT;
+    //canvasの初期化
+    // this.canvas.width = SharedSettings.FIELD_WIDTH;
+    // this.canvas.height = SharedSettings.FIELD_HEIGHT;
+    this.canvas.width = SharedSettings.CANVAS_WIDTH;
+    this.canvas.height = SharedSettings.CANVAS_HEIGHT;
 
     this.initSocket();
 
@@ -82,6 +85,9 @@ class Screen
     if (null != tankSelf){
       this.fCenterX = tankSelf.fX;
       this.fCenterY = tankSelf.fY;
+    }else{
+      this.fCenterX = SharedSettings.FIELD_WIDTH * 0.5;
+      this.fCenterY = SharedSettings.FIELD_HEIGHT * 0.5;
     }
 
     this.context.clearRect(0,0,canvas.width,canvas.height);
@@ -160,20 +166,46 @@ class Screen
   {
     this.context.save();
 
-    let iCountX = parseInt(SharedSettings.FIELD_WIDTH / RenderingSettings.FIELDTILE_WIDTH);
-    let iCountY = parseInt(SharedSettings.FIELD_HEIGHT / RenderingSettings.FIELDTILE_HEIGHT);
-    for(let iIndexY=0; iIndexY < iCountY; iIndexY++)
-    {
-      for(let iIndexX=0;iIndexX<iCountX;iIndexX++){
-        this.context.drawImage( this.assets.imageField,
+    // let iCountX = parseInt(SharedSettings.FIELD_WIDTH / RenderingSettings.FIELDTILE_WIDTH);
+    // let iCountY = parseInt(SharedSettings.FIELD_HEIGHT / RenderingSettings.FIELDTILE_HEIGHT);
+    // for(let iIndexY=0; iIndexY < iCountY; iIndexY++)
+    // {
+    //   for(let iIndexX=0;iIndexX<iCountX;iIndexX++){
+    //     this.context.drawImage( this.assets.imageField,
+    //       this.assets.rectFieldInFieldImage.sx, this.assets.rectFieldInFieldImage.sy,	// 描画元画像の右上座標
+    //       this.assets.rectFieldInFieldImage.sw, this.assets.rectFieldInFieldImage.sh,	// 描画元画像の大きさ
+    //       iIndexX * RenderingSettings.FIELDTILE_WIDTH,// 画像先領域の右上座標（領域中心が、原点になるように指定する）
+    //       iIndexY * RenderingSettings.FIELDTILE_HEIGHT,// 画像先領域の右上座標（領域中心が、原点になるように指定する）
+    //       RenderingSettings.FIELDTILE_WIDTH,	// 描画先領域の大きさ
+    //       RenderingSettings.FIELDTILE_HEIGHT );	// 描画先領域の大きさ
+    //   }
+    // }
+    let fVisibleAreaLeft = this.fCenterX - this.canvas.width * 0.5;
+    let fVisibleAreaTop = this.fCenterY - this.canvas.height * 0.5;
+    let fVisibleAreaRight = this.fCenterX + this.canvas.width * 0.5;
+    let fVisibleAreaBottom = this.fCenterY + this.canvas.height * 0.5;
+    if (0 > fVisibleAreaLeft) { fVisibleAreaLeft = 0.0; }  // ミニマックス補正
+    if (0 > fVisibleAreaTop) { fVisibleAreaTop = 0.0; }    // ミニマックス補正
+    if (SharedSettings.FIELD_WIDTH - 1 < fVisibleAreaRight) { fVisibleAreaRight = SharedSettings.FIELD_WIDTH - 1; }    // ミニマックス補正
+    if (SharedSettings.FIELD_HEIGHT - 1 < fVisibleAreaBottom) { fVisibleAreaBottom = SharedSettings.FIELD_HEIGHT - 1; }    // ミニマックス補正
+    const iBackTileIndexLeft = parseInt(fVisibleAreaLeft / RenderingSettings.FIELDTILE_WIDTH);
+    const iBackTileIndexTop = parseInt(fVisibleAreaTop / RenderingSettings.FIELDTILE_HEIGHT);
+    const iBackTileIndexRight = parseInt(fVisibleAreaRight / RenderingSettings.FIELDTILE_WIDTH);
+    const iBackTileIndexBottom = parseInt(fVisibleAreaBottom / RenderingSettings.FIELDTILE_HEIGHT);
+
+    for (let iIndexY = iBackTileIndexTop; iIndexY <= iBackTileIndexBottom; iIndexY++) {
+      for (let iIndexX = iBackTileIndexLeft; iIndexX <= iBackTileIndexRight; iIndexX++) {
+        // 画像描画
+        this.context.drawImage(this.assets.imageField,
           this.assets.rectFieldInFieldImage.sx, this.assets.rectFieldInFieldImage.sy,	// 描画元画像の右上座標
           this.assets.rectFieldInFieldImage.sw, this.assets.rectFieldInFieldImage.sh,	// 描画元画像の大きさ
           iIndexX * RenderingSettings.FIELDTILE_WIDTH,// 画像先領域の右上座標（領域中心が、原点になるように指定する）
           iIndexY * RenderingSettings.FIELDTILE_HEIGHT,// 画像先領域の右上座標（領域中心が、原点になるように指定する）
           RenderingSettings.FIELDTILE_WIDTH,	// 描画先領域の大きさ
-          RenderingSettings.FIELDTILE_HEIGHT );	// 描画先領域の大きさ
+          RenderingSettings.FIELDTILE_HEIGHT);	// 描画先領域の大きさ
       }
     }
+
     this.context.restore();
   }
 

@@ -16,6 +16,7 @@ module.exports = class World{
     this.setTank = new Set(); //taknリスト
     this.setWall = new Set(); //壁リスト
     this.setBullet = new Set(); //弾丸リスト
+    this.setNotPlayingSocketID = new Set(); //プレイしていない通信のsocketIDリスト
 
     //壁の生成
     for(let i=0;i<GameSettings.WALL_COUNT; i++){
@@ -116,6 +117,9 @@ module.exports = class World{
 
   createTank(strSocketID, strNickName)
   {
+    //ゲーム開始,プレイしていな通信のソケットIDリストから削除
+    this.setNotPlayingSocketID.delete(strSocketID);
+
     //tankの可動域
     const rectTankField = {
       fLeft: 0+SharedSettings.TANK_WIDTH*0.5,
@@ -153,6 +157,7 @@ module.exports = class World{
           this.createBotTank(tank.strNickName);
         }, GameSettings.BOTTANK_WAIT_FOR_NEW_BOT);
     }else{
+      this.setNotPlayingSocketID.add(tank.strSocketID); //プレイしていない通信のソケットIDリストに追加
       this.io.to(tank.strSocketID).emit('dead'); //dead event
     }
   }
